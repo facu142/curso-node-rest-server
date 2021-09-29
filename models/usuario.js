@@ -20,7 +20,7 @@ const usuarioSchema = new Schema({
 
     img: {
         type: String
-    },  
+    },
 
     rol: {
         type: String,
@@ -38,6 +38,12 @@ const usuarioSchema = new Schema({
         default: false
     }
 })
+
+
+usuarioSchema.methods.toJSON = function () {
+    const { __v, password, ...usuario } = this.toObject();
+    return usuario;
+}
 
 module.exports = model('Usuario', usuarioSchema);
 
