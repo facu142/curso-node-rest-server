@@ -28,13 +28,20 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <script>
+
+        var url = (window.location.hostname.includes('localhost')) 
+                    ? 'http://localhost:8080/api/auth/google'
+                    : 'https://rest-server-node-seccion-8.herokuapp.com/api/auth/google'
+
+
+
         function handleCredentialResponse(response) {
             // GOOGLE TOKEN
             console.log('id_token', response.credential);
 
             const body = { id_token: response.credential }
 
-            fetch('http://localhost:8080/api/auth/google', {
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
