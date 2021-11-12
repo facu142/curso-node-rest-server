@@ -1,6 +1,6 @@
 const { response } = require("express");
 const { ObjectId } = require('mongoose').Types
-const {Usuario , Categoria, Producto } = require('../models')
+const { Usuario, Categoria, Producto } = require('../models')
 
 const coleccionesPermitidas = [
     'categorias',
@@ -30,9 +30,12 @@ const buscarUsuarios = async (termino = '', res = response) => {
     // Hace que la busqueda no sea case sensitive
     const regex = new RegExp(termino, 'i')
 
+
+    // Se usa el $or porque se puede buscar segun el nombre o segun el correo
+    // y el $and porque el estado debe estar en true 
     const usuarios = await Usuario.find({
-        $or: [{ nombre: regex }, { correo: regex}],
-        $and: [{estado: true}]
+        $or: [{ nombre: regex }, { correo: regex }],
+        $and: [{ estado: true }]
     });
 
     return res.json({
@@ -42,11 +45,54 @@ const buscarUsuarios = async (termino = '', res = response) => {
 }
 
 
-const buscarCategorias = async (req, res=response) => {
-    
+const buscarCategorias = async (termino = '', res = response) => {
+
+    const esMongoID = ObjectId.isValid(termino)
+
+    if (esMongoID) {
+        const categoria = Categoria.findById(termino)
+
+        return res.json({
+            results: (categoria) ? [categoria] : []
+        })
+    }
+
+
     const regex = new RegExp(termino, 'i')
 
-    const categorias = await Categoria.find()
+    const categorias = await Categoria.find({ nombre: regex, estado: true })
+
+
+    return res.json({
+        results: categorias
+    })
+
+}
+
+
+const buscarProductos = async (termino = '', res = response) => {
+
+    const esMongoID = ObjectId.isValid(termino)
+
+
+    if (esMongoID) {
+        const producto = await Producto.findById(termino);
+
+        // Si existe el producot con ese id lo retorna y si no devuelve un arreglo vacio 
+
+        return res.json({
+            results: (producto) ? [producto] : []
+        });
+    }
+
+
+    const regex = new RegExp(termino, 'i');
+
+    const productos = await Producto.find({ nombre: regex, estado: true })
+                            .populate('categoria', 'nombre')
+    return res.json({
+        results: productos
+    })
 
 }
 
@@ -66,9 +112,12 @@ const buscar = (req, res = response) => {
     switch (coleccion) {
         case 'usuarios':
             buscarUsuarios(termino, res)
+            break
         case 'categorias':
+            buscarCategorias(termino, res)
             break
         case 'productos':
+            buscarProductos(termino, res)
             break
         case 'roles':
             break
