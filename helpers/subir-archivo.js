@@ -18,7 +18,7 @@ const subirArchivo = (files, extensionesValidas = ['png', 'jpg', 'jpeg', 'gif'],
 
         // Nombre temporal del archivo
         const nombreTemp = uuidv4() + '.' + extension;
-        const uploadPath = path.join(__dirname, '../uploads/' + carpeta + nombreTemp);
+        const uploadPath = path.join(__dirname, '../uploads/', carpeta, nombreTemp);
 
         archivo.mv(uploadPath, function (err) {
             if (err) {
